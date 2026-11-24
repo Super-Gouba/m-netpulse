@@ -1,12 +1,12 @@
 ; M-NetPulse 安装包脚本（Inno Setup 6）
 ; 权限全部交给用户：可选“仅为我/所有用户”安装、自定义目录、可选组件
 #define MyAppName "M-NetPulse"
-#define MyAppVersion "1.2.0"
+#define MyAppVersion "1.3.0"
 #define MyAppPublisher "M-NetPulse"
 #define MyAppExeName "MNetPulse.exe"
 
 [Setup]
-AppId={{8E5A2C41-9F3D-4B7E-A1C6-MNETPULSE120}
+AppId={{8E5A2C41-9F3D-4B7E-A1C6-MNETPULSE130}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 AppVerName={#MyAppName} {#MyAppVersion}
@@ -18,7 +18,7 @@ DefaultGroupName={#MyAppName}
 DisableProgramGroupPage=no
 AllowNoIcons=yes
 OutputDir=dist\installer
-OutputBaseFilename=MNetPulse-Setup-1.2.0
+OutputBaseFilename=MNetPulse-Setup-1.3.0
 SetupIconFile=app.ico
 Compression=lzma2/max
 SolidCompression=yes

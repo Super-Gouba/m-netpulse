@@ -8,7 +8,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <AssemblyName>MNetPulse</AssemblyName>
     <RootNamespace>MNetPulse</RootNamespace>
-    <Version>1.2.0</Version>
+    <Version>1.3.0</Version>
     <Product>M-NetPulse</Product>
     <AssemblyTitle>M-NetPulse 网络流量监控</AssemblyTitle>
     <Description>Windows 网络流量监控软件 — 流量消耗统计与实时流量走向</Description>

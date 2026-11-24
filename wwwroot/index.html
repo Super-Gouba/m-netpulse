@@ -12,7 +12,7 @@
   <!-- ============ 标题栏 ============ -->
   <header class="titlebar">
     <span class="brand"><span class="brand-pulse" id="brandIcon"></span>M-NetPulse</span>
-    <span class="tb-sub">流量监控 · v1.2.0</span>
+    <span class="tb-sub">流量监控 · v1.3.0</span>
     <div class="tb-right">
       <span class="tb-net"><span class="dot"></span><span id="tbAdapter">以太网</span></span>
       <span class="tb-net mono" id="tbDown">↓ 0 KB/s</span>
@@ -335,6 +335,19 @@
             <div class="set-row">
               <div class="sr-info"><h4>新应用联网提醒</h4><p>首次联网的应用弹出确认提示（GlassWire 式安全提醒）。</p></div>
               <div class="sr-ctrl"><label class="switch"><input type="checkbox" checked><span class="track"></span></label></div>
+            </div>
+            <div class="set-row">
+              <div class="sr-info"><h4>自动检查更新</h4><p>启动时通过 GitHub Releases 检查新版本，发现后询问是否升级。</p></div>
+              <div class="sr-ctrl"><label class="switch"><input type="checkbox" id="autoUpdateToggle" checked><span class="track"></span></label></div>
+            </div>
+            <div class="set-row">
+              <div class="sr-info"><h4>软件更新</h4><p id="updVersion">当前版本 v1.3.0</p><p id="updState" class="muted">尚未检查</p></div>
+              <div class="sr-ctrl" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+                <button class="btn sm" id="btnCheckUpdate">立即检查</button>
+                <button class="btn sm primary" id="btnInstallUpdate" style="display:none">下载并安装</button>
+                <button class="btn ghost sm" id="btnIgnoreUpdate" style="display:none">忽略此版本</button>
+                <span class="mono muted" id="updProgress" style="font-size:11px"></span>
+              </div>
             </div>
           </div>
           <!-- 配额 -->

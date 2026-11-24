@@ -501,7 +501,58 @@ refreshCharts.settings = () => {
       $("#tbAdapter").textContent = DB.adapters.find((a) => a.isDefault).name.split(" · ")[0];
     })
   );
+
+  /* 软件更新：进入设置页时拉取一次当前状态 */
+  hostCall("updateStatus").then((raw) => {
+    try { renderUpdate(typeof raw === "string" ? JSON.parse(raw) : (raw || {})); } catch { }
+  });
 };
+
+/* ---------- host bridge 工具 ---------- */
+async function hostCall(name, ...args) {
+  try {
+    const h = window.chrome?.webview?.hostObjects?.host;
+    if (!h || typeof h[name] !== "function") return null;
+    return await h[name](...args);
+  } catch { return null; }
+}
+
+/* ---------- 软件更新（GitHub Releases） ---------- */
+function renderUpdate(s) {
+  const ver = $("#updVersion"), st = $("#updState"), sw = $("#autoUpdateToggle");
+  const btnGo = $("#btnInstallUpdate"), btnIgn = $("#btnIgnoreUpdate");
+  if (!ver || !st) return;
+  ver.textContent = "当前版本 v" + (s.current || "");
+  sw.checked = !!s.autoCheck;
+
+  let text = s.message || "";
+  if (s.state === "downloading") text += ` ${s.progress || 0}%`;
+  st.textContent = text;
+
+  const canUpdate = s.state === "newer";
+  btnGo.style.display = canUpdate ? "" : "none";
+  btnIgn.style.display = canUpdate ? "" : "none";
+  btnGo.disabled = s.state === "downloading";
+  btnGo.textContent = s.isPortable ? "打开下载页" : "下载并安装";
+}
+
+const updCheckBtn = $("#btnCheckUpdate");
+if (updCheckBtn) updCheckBtn.addEventListener("click", () => hostCall("checkUpdate"));
+const updGoBtn = $("#btnInstallUpdate");
+if (updGoBtn) updGoBtn.addEventListener("click", async () => {
+  let s = null;
+  try { const raw = await hostCall("updateStatus"); s = typeof raw === "string" ? JSON.parse(raw) : raw; }
+  catch { }
+  // 便携版只能手动替换 exe，引导到发布页；安装版交给宿主下载并静默升级
+  if (s && s.isPortable) await hostCall("openReleasePage");
+  else await hostCall("installUpdate");
+});
+const updIgnBtn = $("#btnIgnoreUpdate");
+if (updIgnBtn) updIgnBtn.addEventListener("click", () => hostCall("ignoreUpdate"));
+const updAutoSw = $("#autoUpdateToggle");
+if (updAutoSw) updAutoSw.addEventListener("change", () => hostCall("setAutoUpdate", updAutoSw.checked));
+
+window.addEventListener("netpulse-update", (e) => renderUpdate(e.data || {}));
 
 /* 悬浮窗开关演示 */
 const widgetSw = $("#widgetToggle");
