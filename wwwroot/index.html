@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>M-NetPulse · 网络流量监控</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="dashboard">
+<div class="window">
+
+  <!-- ============ 标题栏 ============ -->
+  <header class="titlebar">
+    <span class="brand"><span class="brand-pulse" id="brandIcon"></span>M-NetPulse</span>
+    <span class="tb-sub">流量监控 · v1.2.0</span>
+    <div class="tb-right">
+      <span class="tb-net"><span class="dot"></span><span id="tbAdapter">以太网</span></span>
+      <span class="tb-net mono" id="tbDown">↓ 0 KB/s</span>
+      <span class="tb-net mono" id="tbUp">↑ 0 KB/s</span>
+      <div class="win-btns">
+        <button class="win-btn" title="最小化" onclick="toast('窗口最小化（演示）')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/></svg></button>
+        <button class="win-btn" title="最大化" onclick="toast('窗口最大化（演示）')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="1"/></svg></button>
+        <button class="win-btn close" title="关闭" onclick="toast('退出到托盘（演示）')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============ 侧边导航（冻结 App Shell — 所有视图共享） ============ -->
+  <nav class="sidebar">
+    <div class="nav-label">监控</div>
+    <a class="nav-item active" href="#" data-nav="dashboard" data-page-link>
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+      <span>监控总览</span>
+    </a>
+    <a class="nav-item" href="#" data-nav="realtime" data-page-link>
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2"/></svg>
+      <span>实时流量</span>
+    </a>
+    <a class="nav-item" href="#" data-nav="apps" data-page-link>
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+      <span>应用流量</span>
+    </a>
+    <a class="nav-item" href="#" data-nav="conns" data-page-link>
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>
+      <span>连接详情</span>
+    </a>
+    <div class="nav-label">分析</div>
+    <a class="nav-item" href="#" data-nav="reports" data-page-link>
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>
+      <span>统计报表</span>
+    </a>
+    <a class="nav-item" href="#" data-nav="settings" data-page-link>
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
+      <span>设置</span>
+    </a>
+    <div class="sidebar-foot">
+      <div class="svc-row"><span class="svc-dot"></span><span>采集服务运行中</span></div>
+      <div style="margin-top:6px">驱动版本 3.4.1<br>数据目录 C:\ProgramData\MNetPulse</div>
+    </div>
+  </nav>
+
+  <!-- ============ 内容区 ============ -->
+  <main class="content">
+
+    <!-- 通用视图头 -->
+    <div class="view-head">
+      <div class="view-title"><h1 id="viewTitle">监控总览</h1><p id="viewSub"></p></div>
+      <div class="head-actions">
+        <button class="btn sm" onclick="toast('已导出当前视图快照（演示）')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg>
+          导出
+        </button>
+        <button class="btn primary sm" onclick="toast('演示模式：模拟实时采集')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 3 20 12 6 21 6 3"/></svg>
+          立即刷新
+        </button>
+      </div>
+    </div>
+
+    <!-- ============ 视图 1：监控总览 ============ -->
+    <section class="view active" data-view="dashboard">
+      <div class="metric-grid stagger">
+        <div class="metric c-down">
+          <div class="m-label"><span class="pulse-dot g"></span>实时下行</div>
+          <div class="m-value" id="dashDown">0 KB/s</div>
+          <div class="m-foot">今日累计 <span class="mono" style="color:var(--text-sub)">12.83 GB</span></div>
+          <svg class="m-spark" id="sparkDown" width="90" height="34" viewBox="0 0 90 34"></svg>
+        </div>
+        <div class="metric c-up">
+          <div class="m-label"><span class="pulse-dot a"></span>实时上行</div>
+          <div class="m-value" id="dashUp">0 KB/s</div>
+          <div class="m-foot">今日累计 <span class="mono" style="color:var(--text-sub)">3.27 GB</span></div>
+          <svg class="m-spark" id="sparkUp" width="90" height="34" viewBox="0 0 90 34"></svg>
+        </div>
+        <div class="metric">
+          <div class="m-label">本周消耗</div>
+          <div class="m-value">85.6 <span class="unit">GB</span></div>
+          <div class="m-foot"><span class="trend-up">▲ 较上周 +12.4%</span></div>
+        </div>
+        <div class="metric">
+          <div class="m-label">活跃连接</div>
+          <div class="m-value" id="dashConns">—</div>
+          <div class="m-foot">3 个进程限速中</div>
+        </div>
+      </div>
+
+      <div class="grid-31 mb-4">
+        <div class="card">
+          <div class="card-head">今日流量走向
+            <span class="ch-sub">自动刷新 · 0.9s</span>
+            <div class="chart-legend" style="margin-left:14px">
+              <span class="lg"><i style="background:var(--down)"></i>下行</span>
+              <span class="lg"><i style="background:var(--up)"></i>上行</span>
+            </div>
+          </div>
+          <div class="canvas-box"><canvas id="rtChart"></canvas></div>
+        </div>
+        <div class="card quota-card">
+          <div class="card-head">月度配额 <span class="ch-sub" id="quotaDays"></span></div>
+          <div class="card-pad quota-ring-wrap">
+            <svg id="quotaRing" width="130" height="130" viewBox="0 0 130 130" class="quota-ring">
+              <circle cx="65" cy="65" r="52" fill="none" stroke="#1a2538" stroke-width="11"/>
+              <circle class="ring-val-fg" cx="65" cy="65" r="52" fill="none" stroke="#22d3a5" stroke-width="11"
+                stroke-linecap="round" stroke-dasharray="326.7" stroke-dashoffset="326.7"
+                transform="rotate(-90 65 65)" style="transition:stroke-dashoffset .8s ease, stroke .3s"/>
+              <text x="65" y="60" text-anchor="middle" fill="#e8eef8" font-size="21" font-weight="700" font-family="Cascadia Mono, Consolas, monospace" id="quotaPct">0%</text>
+              <text x="65" y="80" text-anchor="middle" fill="#5a6b8a" font-size="10" id="quotaUsed">0 GB</text>
+              <text x="65" y="93" text-anchor="middle" fill="#5a6b8a" font-size="10" id="quotaCap"></text>
+            </svg>
+            <div style="flex:1">
+              <div style="font-weight:600" id="quotaName">家庭宽带 300M</div>
+              <p class="muted" style="font-size:12px;line-height:1.8;margin-top:6px">
+                2026年11月账期<br>已用 <b class="mono" style="color:var(--text)">342.6 GB</b><br>
+                剩余 <b class="mono" style="color:var(--accent)">157.4 GB</b>
+              </p>
+              <button class="btn sm mt-4" onclick="showView('settings');document.querySelector('[data-set=quota]').click()">调整配额</button>
+            </div>
+          </div>
+          <style>
+            #quotaRing.warn .ring-val-fg { stroke: #f5a623; }
+            #quotaRing.hot  .ring-val-fg { stroke: #f4566e; }
+          </style>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-head">告警中心
+            <span class="tag red" id="alertBadge" style="margin-left:auto">4</span>
+          </div>
+          <div class="card-pad" id="alertList"></div>
+        </div>
+        <div class="card">
+          <div class="card-head">桌面悬浮窗预览
+            <span class="ch-sub">可在「设置 → 悬浮窗」调整</span>
+          </div>
+          <div class="card-pad flex" style="justify-content:center;padding:28px">
+            <div class="mini-widget" id="miniWidgetPreview">
+              <div class="mw-title"><span class="pulse-dot g" style="width:6px;height:6px"></span>M-NetPulse 悬浮窗</div>
+              <div class="mw-row"><span style="color:var(--down)">↓ 下行</span><span id="mwDown" style="color:var(--text)">—</span></div>
+              <div class="mw-row"><span style="color:var(--up)">↑ 上行</span><span id="mwUp" style="color:var(--text)">—</span></div>
+              <div class="mw-row"><span class="muted">今日</span><span class="muted">16.1 GB</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 视图 2：实时流量 ============ -->
+    <section class="view" data-view="realtime">
+      <div class="rt-stats stagger">
+        <div class="metric c-down">
+          <div class="m-label"><span class="pulse-dot g"></span>下行速率</div>
+          <div class="rt-big" id="rtDown">—</div>
+          <div class="m-foot">峰值 58.4 MB/s · 14:22</div>
+        </div>
+        <div class="metric c-up">
+          <div class="m-label"><span class="pulse-dot a"></span>上行速率</div>
+          <div class="rt-big" id="rtUp">—</div>
+          <div class="m-foot">峰值 6.8 MB/s · 20:31</div>
+        </div>
+        <div class="metric">
+          <div class="m-label">本分钟下行</div>
+          <div class="rt-big">286 <span class="unit">MB</span></div>
+          <div class="m-foot">较上分钟 +18%</div>
+        </div>
+        <div class="metric">
+          <div class="m-label">带宽占用</div>
+          <div class="rt-big">5.2 <span class="unit">%</span></div>
+          <div class="m-foot">300M 宽带 · 以太网</div>
+        </div>
+      </div>
+
+      <div class="card mb-4">
+        <div class="card-head">实时速率曲线
+          <div class="chart-legend" style="margin-left:14px">
+            <span class="lg"><i style="background:var(--down)"></i>下行</span>
+            <span class="lg"><i style="background:var(--up)"></i>上行</span>
+          </div>
+          <div class="head-actions" style="margin-left:auto">
+            <div class="seg" id="rtRange">
+              <button class="on">1 分钟</button><button>5 分钟</button><button>30 分钟</button>
+            </div>
+            <button class="btn sm" id="rtPause" onclick="(function(){RT.paused=!RT.paused;this.classList.toggle('active-toggle',RT.paused);toast(RT.paused?'已暂停采集':'已恢复采集')}).call(this)">暂停</button>
+          </div>
+        </div>
+        <div class="canvas-box"><canvas id="rtChartRealtime" height="260"></canvas></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">此刻谁在消耗流量 <span class="ch-sub">点击应用跳转连接详情</span></div>
+        <div class="card-pad" style="display:flex;flex-direction:column;gap:10px" id="rtAppBreakdown"></div>
+      </div>
+    </section>
+
+    <!-- ============ 视图 3：应用流量 ============ -->
+    <section class="view" data-view="apps">
+      <div class="card">
+        <div class="card-head">进程流量明细
+          <span class="ch-sub" id="appsSub">数据来自系统网络堆栈 · 上行/下行每秒刷新</span>
+          <button class="btn sm" style="margin-left:auto" onclick="toast('已清除全部限速规则（演示）')">清除全部限速</button>
+        </div>
+        <div style="overflow-x:auto;max-height:560px">
+          <table class="tbl" id="appsTable">
+            <thead><tr>
+              <th>应用 / 进程</th>
+              <th class="r">下行速率</th>
+              <th class="r">上行速率</th>
+              <th class="r">运行累计</th>
+              <th class="r">连接数</th>
+              <th class="r">限速</th>
+            </tr></thead>
+            <tbody></tbody>
+          </table>
+          <div id="appsEmpty" class="muted" style="display:none;padding:18px;text-align:center;font-size:12px;line-height:1.7">
+            暂未采集到正在通信的进程。<br>只有当前有真实网络连接的进程才会出现在这里。
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 视图 4：连接详情 ============ -->
+    <section class="view" data-view="conns">
+      <div class="grid-31 mb-4">
+        <div class="card">
+          <div class="card-head">活动连接
+            <select class="input" id="connAppFilter" style="width:180px;padding:5px 10px;margin-left:14px">
+              <option value="">全部应用</option>
+            </select>
+            <span class="ch-sub" id="connCount"></span>
+          </div>
+          <div style="overflow-x:auto;max-height:520px">
+            <table class="tbl" id="connTable">
+              <thead><tr>
+                <th>应用</th><th>远程地址 / 主机</th><th>协议</th><th>状态</th>
+                <th>下行</th><th>上行</th><th>归属地</th>
+              </tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head">流量归属地分布 <span class="ch-sub">按下行</span></div>
+          <div class="card-pad conn-geo" id="connGeo"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 视图 5：统计报表 ============ -->
+    <section class="view" data-view="reports">
+      <div class="card mb-4">
+        <div class="card-head">消耗趋势
+          <div class="seg" id="repRange" style="margin-left:14px">
+            <button>日</button><button class="on">近 14 天</button><button>月</button><button>年</button>
+          </div>
+          <button class="btn sm" style="margin-left:auto" onclick="toast('报表已导出为 CSV（演示）')">导出 CSV</button>
+        </div>
+        <div class="card-pad">
+          <div class="rep-summary mb-4">
+            <div class="rep-kv"><div class="k">区间下行合计</div><div class="v" style="color:var(--down)" id="repTotalD">—</div></div>
+            <div class="rep-kv"><div class="k">区间上行合计</div><div class="v" style="color:var(--up)" id="repTotalU">—</div></div>
+            <div class="rep-kv"><div class="k">峰值日</div><div class="v" id="repPeak">—</div></div>
+            <div class="rep-kv"><div class="k">日均消耗</div><div class="v" id="repAvg">—</div></div>
+          </div>
+          <div class="bar-col-chart" id="barChart"></div>
+          <div class="chart-legend mt-4" style="justify-content:center">
+            <span class="lg"><i style="background:var(--down)"></i>下行 GB</span>
+            <span class="lg"><i style="background:var(--up)"></i>上行 GB</span>
+          </div>
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-head">本月应用流量排行 <span class="ch-sub">下行 + 上行</span></div>
+          <div class="card-pad" id="usageTop"></div>
+        </div>
+        <div class="card">
+          <div class="card-head">时段分布热力 <span class="ch-sub">近 30 天 · 按小时</span></div>
+          <div class="card-pad">
+            <div id="heatmap" style="display:grid;grid-template-columns:repeat(12,1fr);gap:4px"></div>
+            <div class="chart-legend mt-4" style="justify-content:flex-end">
+              <span class="muted" style="font-size:11px">低</span>
+              <i style="width:60px;height:8px;border-radius:4px;background:linear-gradient(90deg,#16203280,#22d3a5)"></i>
+              <span class="muted" style="font-size:11px">高</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 视图 6：设置 ============ -->
+    <section class="view" data-view="settings">
+      <div class="set-grid">
+        <div class="card set-nav">
+          <button class="on" data-set="general">常规偏好</button>
+          <button data-set="quota">配额与警报</button>
+          <button data-set="adapter">网卡监控</button>
+          <button data-set="widget">悬浮窗</button>
+        </div>
+        <div class="card">
+          <!-- 常规 -->
+          <div class="set-panel on" id="setGeneral">
+            <div class="set-row">
+              <div class="sr-info"><h4>开机自动启动</h4><p>随 Windows 登录后在后台启动采集服务，无需管理员确认。</p></div>
+              <div class="sr-ctrl"><label class="switch"><input type="checkbox" checked><span class="track"></span></label></div>
+            </div>
+            <div class="set-row">
+              <div class="sr-info"><h4>采集精度</h4><p>更高精度带来更流畅的实时曲线，CPU 占用略增。</p></div>
+              <div class="sr-ctrl"><select class="input"><option>标准（500ms）</option><option selected>流畅（900ms）</option><option>节能（2s）</option></select></div>
+            </div>
+            <div class="set-row">
+              <div class="sr-info"><h4>数据保留周期</h4><p>超过周期的历史明细将被自动归档压缩。</p></div>
+              <div class="sr-ctrl"><select class="input"><option>保留 3 个月</option><option selected>保留 12 个月</option><option>永久保留</option></select></div>
+            </div>
+            <div class="set-row">
+              <div class="sr-info"><h4>新应用联网提醒</h4><p>首次联网的应用弹出确认提示（GlassWire 式安全提醒）。</p></div>
+              <div class="sr-ctrl"><label class="switch"><input type="checkbox" checked><span class="track"></span></label></div>
+            </div>
+          </div>
+          <!-- 配额 -->
+          <div class="set-panel" id="setQuota">
+            <div class="set-row">
+              <div class="sr-info"><h4>月度流量上限</h4><p>达到上限后可自动执行提醒、限速或断网动作。</p></div>
+              <div class="sr-ctrl">
+                <div class="field" style="width:100%">
+                  <input type="range" class="range" id="quotaRange" min="50" max="1000" step="50" value="500">
+                  <div class="flex" style="justify-content:space-between"><span class="muted" style="font-size:11px">50 GB</span><span class="mono" style="color:var(--accent)" id="quotaRangeVal">500 GB</span><span class="muted" style="font-size:11px">1000 GB</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="set-row">
+              <div class="sr-info"><h4>80% 预警（琥珀）</h4><p>消耗达到配额 80% 时托盘气泡与悬浮窗变色提醒。</p></div>
+              <div class="sr-ctrl"><label class="switch"><input type="checkbox" checked><span class="track"></span></label></div>
+            </div>
+            <div class="set-row">
+              <div class="sr-info"><h4>95% 严重警报（红色）</h4><p>接近上限时持续告警，可选择自动断开外网。</p></div>
+              <div class="sr-ctrl"><label class="switch"><input type="checkbox" checked><span class="track"></span></label></div>
+            </div>
+            <div class="set-row">
+              <div class="sr-info"><h4>超额动作</h4><p>达到 100% 后执行的自动策略。</p></div>
+              <div class="sr-ctrl"><select class="input"><option>仅提醒</option><option selected>断开外网连接</option><option>断网并关机</option></select></div>
+            </div>
+            <div class="set-row">
+              <div class="sr-info"><h4>账期重置日</h4><p>每月该日 00:00 自动清零月度累计。</p></div>
+              <div class="sr-ctrl"><select class="input"><option>每月 1 日</option><option selected>每月 30 日</option></select></div>
+            </div>
+          </div>
+          <!-- 网卡 -->
+          <div class="set-panel" id="setAdapters">
+            <div id="adapterList"></div>
+          </div>
+          <!-- 悬浮窗 -->
+          <div class="set-panel" id="setWidget">
+            <div class="set-row">
+              <div class="sr-info"><h4>桌面悬浮窗</h4><p>常驻显示实时上下行速率，可贴边隐藏、嵌入任务栏。</p></div>
+              <div class="sr-ctrl"><label class="switch"><input type="checkbox" id="widgetToggle" checked><span class="track"></span></label></div>
+            </div>
+            <div class="set-row">
+              <div class="sr-info"><h4>透明度</h4><p>悬浮窗背景不透明度。</p></div>
+              <div class="sr-ctrl"><input type="range" class="range" min="30" max="100" value="85"></div>
+            </div>
+            <div class="set-row">
+              <div class="sr-info"><h4>贴边自动隐藏</h4><p>拖至屏幕边缘时收起，鼠标靠近时滑出。</p></div>
+              <div class="sr-ctrl"><label class="switch"><input type="checkbox" checked><span class="track"></span></label></div>
+            </div>
+            <div class="set-row">
+              <div class="sr-info"><h4>嵌入任务栏</h4><p>速率数字直接显示在 Windows 任务栏（TrafficMonitor 式）。</p></div>
+              <div class="sr-ctrl"><label class="switch"><input type="checkbox"><span class="track"></span></label></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- Toast -->
+<div id="toast"><span class="t-ico" id="toastIcon"></span><span id="toastMsg"></span></div>
+
+<script src="mock.js"></script>
+<script src="api.js"></script>
+<script src="app.js"></script>
+<script src="native.js"></script>
+</body>
+</html>
