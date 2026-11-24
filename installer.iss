@@ -6,7 +6,9 @@
 #define MyAppExeName "MNetPulse.exe"
 
 [Setup]
-AppId={{8E5A2C41-9F3D-4B7E-A1C6-MNETPULSE130}
+; AppId 必须固定不变：Inno 据此识别已安装的同系列产品并在升级时先卸载旧版。
+; 切勿随版本号修改，否则新版本会被当成独立程序，与旧版并存。
+AppId={{8E5A2C41-9F3D-4B7E-A1C6-MNETPULSE120}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 AppVerName={#MyAppName} {#MyAppVersion}
